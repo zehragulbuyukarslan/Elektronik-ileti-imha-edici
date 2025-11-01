@@ -28,7 +28,7 @@ for keyword in DELETE_KEYWORDS:
     print(f"🔍 Anahtar kelimeye göre aranıyor: {keyword}")
     # Eğer gönderen filtresi de varsa, birlikte kullan
     if DELETE_FROM:
-        status, data = mail.search(None, f'(FROM "{DELETE_FROM}" TEXT "{keyword}")')
+        status, data = mail.search(None, f'(FROM "{DELETE_FROM}" TEXT "{keyword.encode("utf-8")}")')
     else:
         status, data = mail.search(None, f'(TEXT "{keyword}")')
 
@@ -68,4 +68,5 @@ else:
 
 mail.logout()
 print("📤 Oturum kapatıldı.")
+
 
