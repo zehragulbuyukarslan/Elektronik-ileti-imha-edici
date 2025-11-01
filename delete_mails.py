@@ -24,9 +24,9 @@ mail.select("INBOX")
 total_deleted = 0
 
 for keyword in DELETE_KEYWORDS:
-    keyword = keyword.strip()
-    keyword = keyword.encode("utf-8")
+    keyword = keyword.strip()  # Boşlukları temizle
     print(f"🔍 Anahtar kelimeye göre aranıyor: {keyword}")
+    
     # Eğer gönderen filtresi de varsa, birlikte kullan
     if DELETE_FROM:
         status, data = mail.search(None, f'(FROM "{DELETE_FROM}" TEXT "{keyword.encode("utf-8")}")')
@@ -69,6 +69,7 @@ else:
 
 mail.logout()
 print("📤 Oturum kapatıldı.")
+
 
 
 
