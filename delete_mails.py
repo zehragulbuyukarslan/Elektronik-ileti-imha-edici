@@ -8,7 +8,6 @@ import email
 ICLOUD_EMAIL = os.getenv("ICLOUD_EMAIL")
 ICLOUD_PASSWORD = os.getenv("ICLOUD_PASSWORD")
 DELETE_FROM = os.getenv("DELETE_FROM", None)  # opsiyonel
-#"aday_at_e_kariyer_net_vf2bdzf9nh_1de03685@privaterelay.appleid.com"
 
 DELETE_KEYWORDS = os.getenv("DELETE_KEYWORDS", "mülakat 101,seminer,makale,röportaj").split(",")
 
@@ -69,3 +68,4 @@ else:
 
 mail.logout()
 print("📤 Oturum kapatıldı.")
+
