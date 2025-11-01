@@ -25,6 +25,7 @@ total_deleted = 0
 
 for keyword in DELETE_KEYWORDS:
     keyword = keyword.strip()
+    keyword = keyword.encode("utf-8")
     print(f"🔍 Anahtar kelimeye göre aranıyor: {keyword}")
     # Eğer gönderen filtresi de varsa, birlikte kullan
     if DELETE_FROM:
@@ -68,5 +69,6 @@ else:
 
 mail.logout()
 print("📤 Oturum kapatıldı.")
+
 
 
