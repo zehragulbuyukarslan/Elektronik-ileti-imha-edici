@@ -1,0 +1,30 @@
+name: iCloud Mail Cleaner
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # Her sabah 07:00 UTC (Türkiye saatiyle 10:00)
+  workflow_dispatch: # Manuel çalıştırma
+jobs:
+  clean-mails:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Repo'yu klonla
+        uses: actions/checkout@v4
+
+      - name: Python ortamını ayarla
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Gerekli paketleri yükle
+        run: |
+          pip install --upgrade pip
+          pip install python-dotenv
+
+      - name: mailleri temizle
+        run: python delete_mails.py
+        env:
+          ICLOUD_EMAIL: ${{ secrets.ICLOUD_EMAIL }}
+          ICLOUD_PASSWORD: ${{ secrets.ICLOUD_PASSWORD }}
+          DELETE_FROM: ${{ secrets.DELETE_FROM }}
