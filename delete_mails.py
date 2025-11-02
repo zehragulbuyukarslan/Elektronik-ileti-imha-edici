@@ -2,24 +2,31 @@
 
 import os
 import imaplib
-import email
+import sys
 
 # Ortam değişkenlerinden iCloud bilgilerini al
 ICLOUD_EMAIL = os.getenv("ICLOUD_EMAIL")
 ICLOUD_PASSWORD = os.getenv("ICLOUD_PASSWORD")
 DELETE_FROM = os.getenv("DELETE_FROM", None)  # opsiyonel
 
-DELETE_KEYWORDS = os.getenv("DELETE_KEYWORDS", "mulakat,seminer,makale,roportaj,online yayın").split(",")
+DELETE_KEYWORDS = os.getenv(
+    "DELETE_KEYWORDS", "mulakat,seminer,online etkinlik,makale,roportaj,online yayın"
+).split(",")
 
 if not ICLOUD_EMAIL or not ICLOUD_PASSWORD:
-    raise Exception("iCloud bilgileri bulunamadı. Lütfen Secrets'a ekle.")
+    print("❌ iCloud bilgileri bulunamadı. Lütfen Secrets'a ekle.")
+    sys.exit(1)
 
 print(f"📬 iCloud hesabına bağlanılıyor ({ICLOUD_EMAIL})...")
 
 # iCloud IMAP sunucusuna bağlan
-mail = imaplib.IMAP4_SSL("imap.mail.me.com")
-mail.login(ICLOUD_EMAIL, ICLOUD_PASSWORD)
-mail.select("INBOX")
+try:
+    mail = imaplib.IMAP4_SSL("imap.mail.me.com")
+    mail.login(ICLOUD_EMAIL, ICLOUD_PASSWORD)
+    mail.select("INBOX")
+except Exception as e:
+    print(f"❌ IMAP bağlantısı kurulamadı: {e}")
+    sys.exit(1)
 
 total_deleted = 0
 
@@ -27,14 +34,20 @@ for keyword in DELETE_KEYWORDS:
     keyword = keyword.strip()  # Boşlukları temizle
     print(f"🔍 Anahtar kelimeye göre aranıyor: {keyword}")
     
-    # Eğer gönderen filtresi de varsa, birlikte kullan
-    if DELETE_FROM:
-        status, data = mail.search(None, f'(FROM "{DELETE_FROM}" TEXT "{keyword.encode("utf-8")}")')
-    else:
-        status, data = mail.search(None, f'(TEXT "{keyword}")')
+    try:
+        if DELETE_FROM:
+            search_query = f'(FROM "{DELETE_FROM}" TEXT "{keyword}")'
+        else:
+            search_query = f'(TEXT "{keyword}")'
+            
+        status, data = mail.search("UTF-8", search_query)
+    except Exception as e:
+        print(f"⚠️ Arama sırasında hata oluştu ({keyword}): {e}")
+        continue
 
-    if status != "OK":
-        print(f"❌ Arama başarısız ({keyword}).")
+    # Arama başarısızsa veya data None ise
+    if status != "OK" or not data or not data[0]:
+        print(f"🔎 '{keyword}' içeren e-posta bulunamadı.")
         continue
 
     mail_ids = data[0].split()
@@ -42,33 +55,38 @@ for keyword in DELETE_KEYWORDS:
         print(f"🔎 '{keyword}' içeren e-posta bulunamadı.")
         continue
 
-    for mail_id in mail_ids:
-        mail.store(mail_id, "+FLAGS", "\\Deleted")
-    mail.expunge()
-    print(f"✅ {len(mail_ids)} e-posta '{keyword}' kelimesine göre silindi.")
-    total_deleted += len(mail_ids)
+    try:
+        for mail_id in mail_ids:
+            try:
+                # Önce çöp kutusuna taşı
+                result = mail.copy(mail_id, "Deleted Messages")
 
-# Silinecek e-postaları ara
-status, data = mail.search(None, f'(FROM "{DELETE_FROM}")')
+                if result[0] == "OK":
+                    # Gelen kutusundaki kopyayı silinmiş olarak işaretle
+                    mail.store(mail_id, "+FLAGS", "\\Deleted")
+                else:
+                    print(f"⚠️ Mail {mail_id} çöp kutusuna taşınamadı, direkt silinecek.")
+                    mail.store(mail_id, "+FLAGS", "\\Deleted")
 
-if status != "OK":
-    print("❌ Mail arama işlemi başarısız oldu.")
-    exit()
+            except Exception as e:
+                print(f"⚠️ Mail {mail_id} taşınırken hata: {e}")
+                continue
 
-mail_ids = data[0].split()
-print(f"🔍 {len(mail_ids)} adet e-posta bulundu.")
+        # Gelen kutusundaki silinmişleri temizle
+        mail.expunge()
 
-if not mail_ids:
-    print("Silinecek e-posta yok.")
-else:
-    for mail_id in mail_ids:
-        mail.store(mail_id, "+FLAGS", "\\Deleted")
-    mail.expunge()
-    print(f"✅ {len(mail_ids)} e-posta başarıyla silindi.")
+        deleted_count = len(mail_ids)
+        total_deleted += deleted_count
+        print(f"✅ {deleted_count} e-posta '{keyword}' kelimesine göre silindi.")
 
+
+    except Exception as e:
+        print(f"⚠️ Silme sırasında hata: {e}")
 
 mail.logout()
-print("📤 Oturum kapatıldı.")
+print(f"📤 Oturum kapatıldı. Toplam silinen e-posta: {total_deleted}")
+
+sys.exit(0)
 
 
 
