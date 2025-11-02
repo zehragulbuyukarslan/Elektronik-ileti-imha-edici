@@ -9,7 +9,7 @@ ICLOUD_EMAIL = os.getenv("ICLOUD_EMAIL")
 ICLOUD_PASSWORD = os.getenv("ICLOUD_PASSWORD")
 DELETE_FROM = os.getenv("DELETE_FROM", None)  # opsiyonel
 
-DELETE_KEYWORDS = os.getenv("DELETE_KEYWORDS", "mülakat 101,seminer,makale,röportaj").split(",")
+DELETE_KEYWORDS = os.getenv("DELETE_KEYWORDS", "mulakat,seminer,makale,roportaj,online yayın").split(",")
 
 if not ICLOUD_EMAIL or not ICLOUD_PASSWORD:
     raise Exception("iCloud bilgileri bulunamadı. Lütfen Secrets'a ekle.")
@@ -69,6 +69,7 @@ else:
 
 mail.logout()
 print("📤 Oturum kapatıldı.")
+
 
 
 
