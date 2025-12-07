@@ -10,7 +10,7 @@ ICLOUD_PASSWORD = os.getenv("ICLOUD_PASSWORD")
 DELETE_FROM = os.getenv("DELETE_FROM", None)  # opsiyonel
 
 DELETE_KEYWORDS = os.getenv(
-    "DELETE_KEYWORDS", "mulakat,seminer,online etkinlik,makale,roportaj,online yayın"
+    "DELETE_KEYWORDS", "kariyer.net,seminer,online etkinlik,makale,roportaj,online yayın"
 ).split(",")
 
 if not ICLOUD_EMAIL or not ICLOUD_PASSWORD:
@@ -87,6 +87,7 @@ mail.logout()
 print(f"📤 Oturum kapatıldı. Toplam silinen e-posta: {total_deleted}")
 
 sys.exit(0)
+
 
 
 
