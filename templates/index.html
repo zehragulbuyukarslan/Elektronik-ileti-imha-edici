@@ -11,58 +11,59 @@
         <h1>🗑️ Elektronik İleti İmha Edici</h1>
         
         <form id="deleteForm">
-            <div class="form-group">
-                <label for="email">📧 E-mail Adresi</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    placeholder="ornek@icloud.com" 
-                    required
-                >
-                <div class="info-text">iCloud email adresi</div>
-            </div>
-
-            <div class="form-group">
-                <label for="password">🔐 Şifre</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    placeholder="Şifreniz" 
-                    required
-                >
-                <div class="info-text">Şifreniz hiçbir yerde kaydedilmez</div>
-            </div>
-
-            <!-- YENİ: Anahtar Kelimeler -->
-            <div class="form-group">
-                <label for="keywords">🔑 Silinecek Anahtar Kelimeler</label>
-                <textarea 
-                    id="keywords" 
-                    name="keywords" 
-                    rows="4"
-                    placeholder="Her bir kelimeyi Enter ile ayır&#10;Örnek:&#10;kariyer.net&#10;seminer&#10;online etkinlik"
-                    required
-                ></textarea>
-                <div class="info-text">Her satıra bir kelime yazın</div>
-            </div>
-
-            <!-- YENİ: Gönderici Filtresi (Opsiyonel) -->
-            <div class="form-group">
-                <label for="deleteFrom">👤 Gönderici (Opsiyonel)</label>
-                <input 
-                    type="text" 
-                    id="deleteFrom" 
-                    name="delete_from" 
-                    placeholder="Örn: sender@example.com"
-                >
-                <div class="info-text">Boş bırakırsan tüm gönderenlerden siler</div>
-            </div>
-
             <div class="form-row">
                 <div class="form-group">
-                    <label for="startDate">📅 Başlangıç Tarihi (Opsiyonel)</label>
+                    <label for="email">📧 <strong>Email Adresi</strong></label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="ornek@icloud.com" 
+                        required
+                    >
+                    <div class="info-text">iCloud email adresi</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">🔐 <strong></strong>Şifre</strong></label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Şifreniz" 
+                        required
+                    >
+                    <div class="info-text">Şifreniz hiçbir yerde kaydedilmez</div>
+                </div>
+
+                <!-- Anahtar Kelimeler -->
+                <div class="form-group">
+                    <label for="keywords">🔑 <strong>Silinecek Anahtar Kelimeler</strong></label>
+                    <textarea 
+                        id="keywords" 
+                        name="keywords" 
+                        rows="3"
+                        placeholder="Her bir kelimeyi Enter ile ayır&#10;Örnek:&#10;kariyer.net&#10;seminer"
+                        required
+                    ></textarea>
+                    <div class="info-text">Her satıra bir kelime yazın</div>
+                </div>
+
+                <!-- Gönderici Filtresi (Opsiyonel) -->
+                <div class="form-group">
+                    <label for="deleteFrom">👤 <strong>Gönderici</strong> (Opsiyonel)</strong></label>
+                    <input 
+                        type="text" 
+                        id="deleteFrom" 
+                        name="delete_from" 
+                        placeholder="Örn: sender@example.com"
+                    >
+                    <div class="info-text">Boş bırakırsan tüm gönderenlerden siler</div>
+                </div>
+
+                
+                <div class="form-group">
+                    <label for="startDate">📅 <strong>Başlangıç Tarihi</strong> (Opsiyonel)</label>
                     <input 
                         type="date" 
                         id="startDate" 
@@ -71,13 +72,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="endDate">📅 Bitiş Tarihi (Opsiyonel)</label>
+                    <label for="endDate">📅 <strong>Bitiş Tarihi</strong> (Opsiyonel)</label>
                     <input 
                         type="date" 
                         id="endDate" 
                         name="end_date"
                     >
                 </div>
+                
             </div>
 
             <button type="submit" id="deleteBtn">E-postaları Sil</button>
@@ -86,66 +88,6 @@
         </form>
     </div>
 
-    <script>
-        const form = document.getElementById('deleteForm');
-        const statusDiv = document.getElementById('status');
-        const deleteBtn = document.getElementById('deleteBtn');
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const keywords = document.getElementById('keywords').value;
-            const deleteFrom = document.getElementById('deleteFrom').value;
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-
-            // Validasyon
-            if (!email || !password || !keywords) {
-                showStatus('Email, şifre ve anahtar kelimeler gereklidir!', 'error');
-                return;
-            }
-
-            // Loading durumu
-            showStatus('<span class="spinner"></span>İşlem başladı... Lütfen bekleyin...', 'loading');
-            deleteBtn.disabled = true;
-
-            try {
-                const response = await fetch('/delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password,
-                        keywords: keywords,
-                        delete_from: deleteFrom,
-                        start_date: startDate,
-                        end_date: endDate
-                    })
-                });
-
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    showStatus(`✅ ${result.deleted} e-posta başarıyla silindi!`, 'success');
-                    form.reset();
-                } else {
-                    showStatus('❌ Hata: ' + result.message, 'error');
-                }
-            } catch (error) {
-                showStatus('❌ Bir hata oluştu: ' + error.message, 'error');
-            } finally {
-                deleteBtn.disabled = false;
-            }
-        });
-
-        function showStatus(message, type) {
-            statusDiv.className = 'status ' + type;
-            statusDiv.innerHTML = message;
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
